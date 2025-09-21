@@ -3,21 +3,25 @@ package org.mc.authservice.jwtUtills;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.mc.authservice.models.Role;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long expiration = 1000 * 60 * 60;
 
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Collection<Role> role) {
+        long expiration = 1000 * 60 * 60;
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", role)
+                .claim("username", username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)

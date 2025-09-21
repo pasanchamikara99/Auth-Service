@@ -2,6 +2,7 @@ package org.mc.authservice.controller;
 
 import org.mc.authservice.dto.LoginRequest;
 import org.mc.authservice.dto.LoginResponse;
+import org.mc.authservice.dto.UserDto;
 import org.mc.authservice.jwtUtills.JwtUtil;
 import org.mc.authservice.models.AppUser;
 import org.mc.authservice.service.UserService;
@@ -42,15 +43,16 @@ public class AuthController {
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
-            String token = jwtUtil.generateToken(request.getUsername());
-            return ResponseEntity.ok(new LoginResponse(token));
+            AppUser user = userService.getUserByName(request.getUsername());
+            String token = jwtUtil.generateToken(request.getUsername(),user.getRole());
+            return ResponseEntity.ok(new LoginResponse(token, request.getUsername()));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
+    public ResponseEntity<AppUser> saveUser(@RequestBody UserDto user) {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());

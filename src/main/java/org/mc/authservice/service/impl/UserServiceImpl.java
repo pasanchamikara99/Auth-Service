@@ -2,6 +2,7 @@ package org.mc.authservice.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mc.authservice.dto.UserDto;
 import org.mc.authservice.models.AppUser;
 import org.mc.authservice.models.Role;
 import org.mc.authservice.repository.RoleRepository;
@@ -11,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final RoleRepository roleRepository;
 
     @Override
-    public AppUser saveUser(AppUser user) {
+    public AppUser saveUser(UserDto request) {
+
+        Role role = roleRepository.findByName(request.getRoleId());
+
+        AppUser user = AppUser.builder()
+                .userName(request.getUserName())
+                .name(request.getName())
+                .password(request.getPassword())
+                .role(List.of(role))
+                .build();
+
         return userRepository.save(user);
     }
 
